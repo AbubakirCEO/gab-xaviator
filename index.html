@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAB-X GLOBAL | Aviator</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-primary: #07090e;
+            --bg-secondary: #0d121b;
+            --bg-card: #131b29;
+            --accent-red: #ff3838;
+            --accent-green: #2ed573;
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+            --border-color: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-bottom: 24px;
+        }
+
+        /* Global Header */
+        .header {
+            width: 100%;
+            background-color: var(--bg-secondary);
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-logo {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: var(--accent-red);
+        }
+
+        .brand-logo span {
+            color: var(--text-main);
+        }
+
+        .brand-subtitle {
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .balance-container {
+            text-align: right;
+        }
+
+        .balance-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .balance-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .btn-deposit {
+            background: var(--accent-green);
+            color: var(--text-main);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Stats Ribbon */
+        .stats-ribbon {
+            width: 100%;
+            background-color: var(--bg-secondary);
+            padding: 8px 12px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border-color);
+            scrollbar-width: none;
+        }
+
+        .stats-ribbon::-webkit-scrollbar {
+            display: none;
+        }
+
+        .stat-chip {
+            background: var(--bg-card);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-chip.high {
+            color: #ffa502;
+            border-color: rgba(255, 165, 2, 0.2);
+        }
+
+        /* Viewport */
+        .game-viewport {
+            width: 100%;
+            max-width: 460px;
+            height: 250px;
+            background: radial-gradient(circle at center, #162235 0%, var(--bg-secondary) 100%);
+            margin: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .viewport-watermark {
+            position: absolute;
+            top: 12px;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            opacity: 0.25;
+        }
+
+        #multiplier-display {
+            font-size: 54px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            z-index: 2;
+        }
+
+        #status-message {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            z-index: 2;
+        }
+
+        .aircraft-icon {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            font-size: 32px;
+            z-index: 2;
+            display: none;
+        }
+
+        /* Controls */
+        .control-panel {
+            width: 100%;
+            max-width: 460px;
+            padding: 0 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bet-stepper {
+            display: flex;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .stepper-btn {
+            background-color: var(--bg-card);
+            border: none;
+            color: var(--text-main);
+            padding: 14px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #bet-input-field {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+        }
+
+        .action-button {
+            width: 100%;
+            padding: 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+        }
+
+        #btn-place-bet {
+            background-color: var(--accent-green);
+            color: var(--text-main);
+        }
+
+        #btn-cashout {
+            background-color: var(--accent-red);
+            color: var(--text-main);
+            display: none;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 7, 10, 0.85);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background-color: var(--bg-secondary);
+            width: 90%;
+            max-width: 340px;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .modal-title { font-size: 16px; font-weight: 700; text-align: center; }
+        .modal-desc { font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.4; }
+
+        .card-snippet {
+            background-color: var(--bg-primary);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px dashed var(--border-color);
+            text-align: center;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--accent-green);
+            letter-spacing: 1.5px;
+        }
+
+        .modal-input {
+            width: 100%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 15px;
+            text-align: center;
+            outline: none;
+        }
+
+        .modal-actions { display: flex; gap: 8px; margin-top: 4px; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 6px; border: none; font-weight: 700; font-size: 13px; cursor: pointer; }
+        .btn-confirm { background-color: var(--accent-green); color: var(--text-main); }
+        .btn-cancel { background-color: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border-color); }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="brand-container">
+            <div class="brand-logo">GAB-X <span>GLOBAL</span></div>
+            <div class="brand-subtitle">Aviator System</div>
+        </div>
+        <div class="header-actions">
+            <div class="balance-container">
+                <div class="balance-label">Balans</div>
+                <div class="balance-value" id="ui-balance">10,000 UZS</div>
+            </div>
+            <button class="btn-deposit" id="trigger-deposit">+ Kiritish</button>
+        </div>
+    </header>
+
+    <div class="stats-ribbon">
+        <span class="stat-chip">1.35x</span>
+        <span class="stat-chip high">24.50x</span>
+        <span class="stat-chip">1.80x</span>
+        <span class="stat-chip high">540.00x</span>
+        <span class="stat-chip">2.10x</span>
+    </div>
+
+    <main class="game-viewport">
+        <div class="viewport-watermark">GAB-X GLOBAL</div>
+        <div id="status-message">Raund boshlanishini kuting...</div>
+        <div id="multiplier-display">1.00x</div>
+        <div class="aircraft-icon" id="aircraft">✈️</div>
+    </main>
+
+    <section class="control-panel">
+        <div class="bet-stepper">
+            <button class="stepper-btn" onclick="Engine.modifyBet(-1000)">−</button>
+            <input type="text" id="bet-input-field" value="10,000" readonly>
+            <button class="stepper-btn" onclick="Engine.modifyBet(1000)">+</button>
+        </div>
+
+        <button class="action-button" id="btn-place-bet" onclick="Engine.handleBetAction()">Stavka Tikish</button>
+        <button class="action-button" id="btn-cashout" onclick="Engine.handleCashout()">Olish (Cash Out)</button>
+    </section>
+
+    <div class="modal-overlay" id="deposit-modal">
+        <div class="modal-card">
+            <div class="modal-title">GAB-X Global To'lov</div>
+            <div class="modal-desc">Quyidagi rasmiy karta raqamiga mablag' o'tkazing va summani kiriting:</div>
+            <div class="card-snippet">9860 3501 4229 7281</div>
+            <input type="number" class="modal-input" id="deposit-input-val" placeholder="Summa (UZS)" value="50000">
+            <div class="modal-actions">
+                <button class="modal-btn btn-cancel" onclick="UI.toggleModal(false)">Bekor qilish</button>
+                <button class="modal-btn btn-confirm" onclick="Engine.processDeposit()">Tasdiqlash</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        const TelegramPlatform = window.Telegram?.WebApp;
+        if (TelegramPlatform) {
+            TelegramPlatform.expand();
+        }
+
+        const State = {
+            balance: 10000,
+            currentBet: 10000,
+            status: 'IDLE',
+            multiplier: 1.00,
+            crashPoint: 1.00,
+            ticker: null
+        };
+
+        const DOM = {
+            balance: document.getElementById('ui-balance'),
+            multiplier: document.getElementById('multiplier-display'),
+            status: document.getElementById('status-message'),
+            betInput: document.getElementById('bet-input-field'),
+            btnBet: document.getElementById('btn-place-bet'),
+            btnCashout: document.getElementById('btn-cashout'),
+            aircraft: document.getElementById('aircraft'),
+            modal: document.getElementById('deposit-modal'),
+            depositInput: document.getElementById('deposit-input-val')
+        };
+
+        const UI = {
+            updateBalance() {
+                DOM.balance.textContent = State.balance.toLocaleString() + " UZS";
+            },
+            
+            toggleModal(show) {
+                if (show) {
+                    DOM.modal.classList.add('active');
+                } else {
+                    DOM.modal.classList.remove('active');
+                }
+            },
+
+            setGameState(activeState) {
+                State.status = activeState;
+                if (activeState === 'IDLE' || activeState === 'BETTING') {
+                    DOM.btnBet.style.display = 'block';
+                    DOM.btnCashout.style.display = 'none';
+                    if (activeState === 'IDLE') {
+                        DOM.aircraft.style.display = 'none';
+                    }
+                } else if (activeState === 'FLYING') {
+                    DOM.btnBet.style.display = 'none';
+                    DOM.btnCashout.style.display = 'block';
+                    DOM.aircraft.style.display = 'block';
+                }
+            }
+        };
+
+        const Engine = {
+            modifyBet(delta) {
+                if (State.status !== 'IDLE') return;
+                State.currentBet += delta;
+                if (State.currentBet < 1000) State.currentBet = 1000;
+                DOM.betInput.value = State.currentBet.toLocaleString();
+            },
+
+            processDeposit() {
+                const amount = parseFloat(DOM.depositInput.value);
+                if (isNaN(amount) || amount <= 0) {
+                    alert("Yaroqli summa kiriting!");
+                    return;
+                }
+                State.balance += amount;
+                UI.updateBalance();
+                UI.toggleModal(false);
+            },
+
+            calculateCrashPoint() {
+                const randomFactor = Math.random();
+                let calculated = Math.exp(6.8 * randomFactor);
+                return parseFloat(Math.min(Math.max(calculated, 1.00), 1000.00).toFixed(2));
+            },
+
+            handleBetAction() {
+                if (State.status !== 'IDLE') return;
+                if (State.balance < State.currentBet) {
+                    alert("Balansda yetarli mablag' mavjud emas!");
+                    return;
+                }
+
+                State.balance -= State.currentBet;
+                UI.updateBalance();
+
+                UI.setGameState('BETTING');
+                DOM.status.textContent = "Raund tayyorlanmoqda...";
+                DOM.multiplier.style.color = "var(--text-main)";
+
+                setTimeout(() => {
+                    this.initiateFlight();
+                }, 1500);
+            },
+
+            initiateFlight() {
+                UI.setGameState('FLYING');
+                State.multiplier = 1.00;
+                State.crashPoint = this.calculateCrashPoint();
+
+                DOM.status.textContent = "Samolyot uchmoqda...";
+                
+                let posX = 24;
+                let posY = 24;
+
+                State.ticker = setInterval(() => {
+                    State.multiplier += 0.03;
+                    DOM.multiplier.textContent = State.multiplier.toFixed(2) + "x";
+
+                    if (posX < 180) posX += 1.0;
+                    if (posY < 90) posY += 0.6;
+                    DOM.aircraft.style.left = posX + 'px';
+                    DOM.aircraft.style.bottom = posY + 'px';
+
+                    if (State.multiplier >= State.crashPoint) {
+                        this.triggerCrash();
+                    }
+                }, 75);
+            },
+
+            handleCashout() {
+                if (State.status !== 'FLYING') return;
+                clearInterval(State.ticker);
+
+                const payout = State.currentBet * State.multiplier;
+                State.balance += payout;
+                UI.updateBalance();
+
+                UI.setGameState('IDLE');
+                DOM.multiplier.style.color = "var(--accent-green)";
+                DOM.status.textContent = `Yutuq: +${payout.toLocaleString(undefined, {maximumFractionDigits: 2})} UZS`;
+            },
+
+            triggerCrash() {
+                clearInterval(State.ticker);
+                UI.setGameState('IDLE');
+
+                DOM.multiplier.style.color = "var(--accent-red)";
+                DOM.status.textContent = `Uchib ketdi! (${State.crashPoint.toFixed(2)}x)`;
+            }
+        };
+
+        document.getElementById('trigger-deposit').addEventListener('click', () => {
+            UI.toggleModal(true);
+        });
+
+        UI.updateBalance();
+    </script>
+</body>
+</html>
+
